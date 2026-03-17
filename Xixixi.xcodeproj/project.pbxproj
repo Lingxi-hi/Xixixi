@@ -1,0 +1,375 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A001 /* XixixiApp.swift in Sources */             = {isa = PBXBuildFile; fileRef = F001; };
+		A002 /* RootView.swift in Sources */              = {isa = PBXBuildFile; fileRef = F002; };
+		A010 /* Pet.swift in Sources */                   = {isa = PBXBuildFile; fileRef = F010; };
+		A011 /* DailyTask.swift in Sources */             = {isa = PBXBuildFile; fileRef = F011; };
+		A012 /* RedLine.swift in Sources */               = {isa = PBXBuildFile; fileRef = F012; };
+		A013 /* StoreItem.swift in Sources */             = {isa = PBXBuildFile; fileRef = F013; };
+		A014 /* Achievement.swift in Sources */           = {isa = PBXBuildFile; fileRef = F014; };
+		A015 /* Season.swift in Sources */                = {isa = PBXBuildFile; fileRef = F015; };
+		A020 /* GameStore.swift in Sources */             = {isa = PBXBuildFile; fileRef = F020; };
+		A030 /* Color+Theme.swift in Sources */           = {isa = PBXBuildFile; fileRef = F030; };
+		A040 /* CoinBadgeView.swift in Sources */         = {isa = PBXBuildFile; fileRef = F040; };
+		A041 /* PetAnimationView.swift in Sources */      = {isa = PBXBuildFile; fileRef = F041; };
+		A050 /* MainGardenView.swift in Sources */        = {isa = PBXBuildFile; fileRef = F050; };
+		A051 /* PetInteractionView.swift in Sources */    = {isa = PBXBuildFile; fileRef = F051; };
+		A052 /* StoreView.swift in Sources */             = {isa = PBXBuildFile; fileRef = F052; };
+		A053 /* BuildView.swift in Sources */             = {isa = PBXBuildFile; fileRef = F053; };
+		A054 /* DailyTasksView.swift in Sources */        = {isa = PBXBuildFile; fileRef = F054; };
+		A055 /* AchievementView.swift in Sources */       = {isa = PBXBuildFile; fileRef = F055; };
+		A060 /* ParentUnlockView.swift in Sources */      = {isa = PBXBuildFile; fileRef = F060; };
+		A061 /* ParentHomeView.swift in Sources */        = {isa = PBXBuildFile; fileRef = F061; };
+		A062 /* TaskManagementView.swift in Sources */    = {isa = PBXBuildFile; fileRef = F062; };
+		A063 /* PendingApprovalView.swift in Sources */   = {isa = PBXBuildFile; fileRef = F063; };
+		A064 /* RedLineView.swift in Sources */           = {isa = PBXBuildFile; fileRef = F064; };
+		A065 /* DailySettlementView.swift in Sources */   = {isa = PBXBuildFile; fileRef = F065; };
+		A066 /* HistoryView.swift in Sources */           = {isa = PBXBuildFile; fileRef = F066; };
+		A067 /* ParentSettingsView.swift in Sources */    = {isa = PBXBuildFile; fileRef = F067; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		F001 /* XixixiApp.swift */             = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XixixiApp.swift; sourceTree = "<group>"; };
+		F002 /* RootView.swift */              = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		F010 /* Pet.swift */                   = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pet.swift; sourceTree = "<group>"; };
+		F011 /* DailyTask.swift */             = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyTask.swift; sourceTree = "<group>"; };
+		F012 /* RedLine.swift */               = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedLine.swift; sourceTree = "<group>"; };
+		F013 /* StoreItem.swift */             = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreItem.swift; sourceTree = "<group>"; };
+		F014 /* Achievement.swift */           = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Achievement.swift; sourceTree = "<group>"; };
+		F015 /* Season.swift */                = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Season.swift; sourceTree = "<group>"; };
+		F020 /* GameStore.swift */             = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStore.swift; sourceTree = "<group>"; };
+		F030 /* Color+Theme.swift */           = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Theme.swift"; sourceTree = "<group>"; };
+		F040 /* CoinBadgeView.swift */         = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinBadgeView.swift; sourceTree = "<group>"; };
+		F041 /* PetAnimationView.swift */      = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetAnimationView.swift; sourceTree = "<group>"; };
+		F050 /* MainGardenView.swift */        = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainGardenView.swift; sourceTree = "<group>"; };
+		F051 /* PetInteractionView.swift */    = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetInteractionView.swift; sourceTree = "<group>"; };
+		F052 /* StoreView.swift */             = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreView.swift; sourceTree = "<group>"; };
+		F053 /* BuildView.swift */             = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildView.swift; sourceTree = "<group>"; };
+		F054 /* DailyTasksView.swift */        = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyTasksView.swift; sourceTree = "<group>"; };
+		F055 /* AchievementView.swift */       = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementView.swift; sourceTree = "<group>"; };
+		F060 /* ParentUnlockView.swift */      = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentUnlockView.swift; sourceTree = "<group>"; };
+		F061 /* ParentHomeView.swift */        = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentHomeView.swift; sourceTree = "<group>"; };
+		F062 /* TaskManagementView.swift */    = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskManagementView.swift; sourceTree = "<group>"; };
+		F063 /* PendingApprovalView.swift */   = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingApprovalView.swift; sourceTree = "<group>"; };
+		F064 /* RedLineView.swift */           = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedLineView.swift; sourceTree = "<group>"; };
+		F065 /* DailySettlementView.swift */   = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailySettlementView.swift; sourceTree = "<group>"; };
+		F066 /* HistoryView.swift */           = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		F067 /* ParentSettingsView.swift */    = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentSettingsView.swift; sourceTree = "<group>"; };
+		FPROD /* Xixixi.app */                 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Xixixi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BUILD_FRAMEWORKS = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		GRP_ROOT = {
+			isa = PBXGroup;
+			children = (
+				GRP_XIXIXI,
+				GRP_PRODUCTS,
+			);
+			sourceTree = "<group>";
+		};
+		GRP_PRODUCTS = {
+			isa = PBXGroup;
+			children = (FPROD,);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		GRP_XIXIXI = {
+			isa = PBXGroup;
+			children = (
+				GRP_APP,
+				GRP_MODELS,
+				GRP_STORE,
+				GRP_EXTENSIONS,
+				GRP_VIEWS,
+			);
+			path = Xixixi;
+			sourceTree = "<group>";
+		};
+		GRP_APP = {
+			isa = PBXGroup;
+			children = (F001, F002);
+			path = App;
+			sourceTree = "<group>";
+		};
+		GRP_MODELS = {
+			isa = PBXGroup;
+			children = (F010, F011, F012, F013, F014, F015);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		GRP_STORE = {
+			isa = PBXGroup;
+			children = (F020,);
+			path = Store;
+			sourceTree = "<group>";
+		};
+		GRP_EXTENSIONS = {
+			isa = PBXGroup;
+			children = (F030,);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		GRP_VIEWS = {
+			isa = PBXGroup;
+			children = (GRP_SHARED, GRP_CHILD, GRP_PARENT);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		GRP_SHARED = {
+			isa = PBXGroup;
+			children = (F040, F041);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		GRP_CHILD = {
+			isa = PBXGroup;
+			children = (F050, F051, F052, F053, F054, F055);
+			path = Child;
+			sourceTree = "<group>";
+		};
+		GRP_PARENT = {
+			isa = PBXGroup;
+			children = (F060, F061, F062, F063, F064, F065, F066, F067);
+			path = Parent;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		TARGET_XIXIXI = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CFGLIST_TARGET;
+			buildPhases = (BUILD_SOURCES, BUILD_FRAMEWORKS, BUILD_RESOURCES);
+			buildRules = ();
+			dependencies = ();
+			name = Xixixi;
+			productName = Xixixi;
+			productReference = FPROD;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		PROJECT = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					TARGET_XIXIXI = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = CFGLIST_PROJECT;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = zh-Hans;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, "zh-Hans", Base);
+			mainGroup = GRP_ROOT;
+			productRefGroup = GRP_PRODUCTS;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (TARGET_XIXIXI,);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BUILD_RESOURCES = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BUILD_SOURCES = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A001, A002,
+				A010, A011, A012, A013, A014, A015,
+				A020,
+				A030,
+				A040, A041,
+				A050, A051, A052, A053, A054, A055,
+				A060, A061, A062, A063, A064, A065, A066, A067,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		CFG_DEBUG_PROJECT = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_CYCLE = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)");
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		CFG_RELEASE_PROJECT = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		CFG_DEBUG_TARGET = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "我的小毛球";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025. All rights reserved.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xixixi.petgame;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		CFG_RELEASE_TARGET = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "我的小毛球";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025. All rights reserved.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xixixi.petgame;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CFGLIST_PROJECT = {
+			isa = XCConfigurationList;
+			buildConfigurations = (CFG_DEBUG_PROJECT, CFG_RELEASE_PROJECT);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CFGLIST_TARGET = {
+			isa = XCConfigurationList;
+			buildConfigurations = (CFG_DEBUG_TARGET, CFG_RELEASE_TARGET);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = PROJECT;
+}
