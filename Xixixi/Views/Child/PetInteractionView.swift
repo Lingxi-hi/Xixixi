@@ -162,7 +162,7 @@ struct PetInteractionView: View {
     // MARK: - Actions
     private func handlePet() {
         store.petThePet()
-        showMessage(messages: ["好舒服～", "摸摸真好！", "咕噜咕噜～", "喜欢～"])
+        showMessage(["好舒服～", "摸摸真好！", "咕噜咕噜～", "喜欢～"])
         withAnimation(.bouncy) { showPetEffect = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             showPetEffect = false
@@ -171,7 +171,7 @@ struct PetInteractionView: View {
 
     private func handleHug() {
         store.hugPet()
-        showMessage(messages: ["好温暖！", "抱抱最棒了！", "超级喜欢！", "开心！！"])
+        showMessage(["好温暖！", "抱抱最棒了！", "超级喜欢！", "开心！！"])
         withAnimation(.bouncy) { showHugEffect = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
             withAnimation { showHugEffect = false }
