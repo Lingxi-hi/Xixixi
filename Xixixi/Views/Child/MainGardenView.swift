@@ -172,8 +172,8 @@ struct MainGardenView: View {
     // MARK: - Grass decoration
     private var grassDecoration: some View {
         HStack(spacing: 16) {
-            ForEach(["🌿", "🌱", "🍀", "🌿"], id: \.self) { plant in
-                Text(plant).font(.system(size: 20))
+            ForEach(["🌿", "🌱", "🍀", "🌸"].indices, id: \.self) { i in
+                Text(["🌿", "🌱", "🍀", "🌸"][i]).font(.system(size: 20))
             }
         }
         .padding(.top, -12)
