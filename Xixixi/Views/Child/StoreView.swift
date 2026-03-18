@@ -6,9 +6,9 @@ struct StoreView: View {
     @Environment(\.dismiss) var dismiss
 
     @State private var selectedCategory: ItemCategory? = nil
-    @State private var purchasedItem: StoreItem? = nil
-    @State private var showPurchaseSuccess = false
-    @State private var showInsufficientCoins = false
+    @State private var purchasedItem: StoreItem?       = nil
+    @State private var showPurchaseSuccess             = false
+    @State private var showInsufficientCoins           = false
 
     var filteredItems: [StoreItem] {
         guard let cat = selectedCategory else { return StoreItem.catalog }
@@ -21,7 +21,7 @@ struct StoreView: View {
                 Color.xBackground.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    // Coin display
+                    // Coin row
                     HStack {
                         Text("你的金币")
                             .font(.system(size: 15, weight: .medium, design: .rounded))
@@ -35,9 +35,11 @@ struct StoreView: View {
                     // Category filter
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) {
-                            categoryChip(nil, label: "全部", emoji: "✨")
+                            categoryChip(nil, label: "全部", symbol: "square.grid.2x2.fill",
+                                         color: Color.xSubtext)
                             ForEach(ItemCategory.allCases, id: \.self) { cat in
-                                categoryChip(cat, label: cat.displayName, emoji: cat.emoji)
+                                categoryChip(cat, label: cat.displayName,
+                                             symbol: cat.sfSymbol, color: cat.symbolColor)
                             }
                         }
                         .padding(.horizontal, 20)
@@ -63,19 +65,22 @@ struct StoreView: View {
                     }
                 }
 
-                // Purchase success overlay
+                // Success overlay
                 if showPurchaseSuccess, let item = purchasedItem {
                     purchaseSuccessOverlay(item: item)
                 }
 
-                // Insufficient coins
                 if showInsufficientCoins {
                     insufficientCoinsOverlay
                 }
             }
-            .navigationTitle("🛍️ 宠物商店")
+            .navigationTitle("商店")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Image(systemName: "bag.fill")
+                        .foregroundStyle(Color(red:1.0, green:0.55, blue:0.20))
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("关闭") { dismiss() }
                         .foregroundColor(Color.xPrimary)
@@ -86,11 +91,14 @@ struct StoreView: View {
     }
 
     // MARK: - Category chip
-    private func categoryChip(_ category: ItemCategory?, label: String, emoji: String) -> some View {
+    private func categoryChip(_ category: ItemCategory?, label: String,
+                               symbol: String, color: Color) -> some View {
         let isSelected = selectedCategory == category
         return Button(action: { selectedCategory = category }) {
-            HStack(spacing: 4) {
-                Text(emoji).font(.system(size: 14))
+            HStack(spacing: 5) {
+                Image(systemName: symbol)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(isSelected ? .white : color)
                 Text(label)
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundColor(isSelected ? .white : Color.xText)
@@ -103,7 +111,7 @@ struct StoreView: View {
         }
     }
 
-    // MARK: - Purchase action
+    // MARK: - Purchase
     private func purchase(_ item: StoreItem) {
         guard store.canAfford(item) else {
             withAnimation(.bouncy) { showInsufficientCoins = true }
@@ -122,9 +130,10 @@ struct StoreView: View {
 
     // MARK: - Overlays
     private func purchaseSuccessOverlay(item: StoreItem) -> some View {
-        VStack(spacing: 10) {
-            Text(item.emoji)
-                .font(.system(size: 60))
+        VStack(spacing: 12) {
+            Image(systemName: item.sfSymbol)
+                .font(.system(size: 52, weight: .semibold))
+                .foregroundStyle(item.symbolColor)
                 .scaleEffect(showPurchaseSuccess ? 1.0 : 0.4)
 
             Text("买到了！\(item.name)")
@@ -145,9 +154,8 @@ struct StoreView: View {
     }
 
     private var insufficientCoinsOverlay: some View {
-        VStack(spacing: 8) {
-            Text("🪙")
-                .font(.system(size: 40))
+        VStack(spacing: 10) {
+            CoinIcon(size: 44)
             Text("金币不够哦～")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
@@ -155,7 +163,7 @@ struct StoreView: View {
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundColor(.white.opacity(0.85))
         }
-        .padding(24)
+        .padding(28)
         .background(Color.xDanger)
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: 8)
@@ -168,7 +176,6 @@ struct StoreItemCard: View {
     let item: StoreItem
     let canAfford: Bool
     let onBuy: () -> Void
-
     @State private var tapped = false
 
     var body: some View {
@@ -178,13 +185,14 @@ struct StoreItemCard: View {
             onBuy()
         }) {
             VStack(spacing: 10) {
-                // Item image
+                // Item icon
                 ZStack {
                     Circle()
-                        .fill(Color.xPrimary.opacity(0.12))
+                        .fill(item.symbolColor.opacity(0.15))
                         .frame(width: 70, height: 70)
-                    Text(item.emoji)
-                        .font(.system(size: 40))
+                    Image(systemName: item.sfSymbol)
+                        .font(.system(size: 32, weight: .semibold))
+                        .foregroundStyle(item.symbolColor)
                 }
 
                 // Name
@@ -194,21 +202,27 @@ struct StoreItemCard: View {
 
                 // Description
                 Text(item.description)
-                    .font(.system(size: 11, weight: .regular, design: .rounded))
+                    .font(.system(size: 11, design: .rounded))
                     .foregroundColor(Color.xSubtext)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
 
                 // Boost indicators
                 HStack(spacing: 4) {
-                    if item.hungerBoost > 0 { boostPill("🍖", value: item.hungerBoost, color: .orange) }
-                    if item.thirstBoost > 0 { boostPill("💧", value: item.thirstBoost, color: .blue) }
-                    if item.moodBoost > 0   { boostPill("💛", value: item.moodBoost, color: .yellow) }
+                    if item.hungerBoost > 0 {
+                        boostPill("fork.knife", value: item.hungerBoost, color: .orange)
+                    }
+                    if item.thirstBoost > 0 {
+                        boostPill("drop.fill",  value: item.thirstBoost, color: .blue)
+                    }
+                    if item.moodBoost > 0 {
+                        boostPill("heart.fill", value: item.moodBoost,  color: .pink)
+                    }
                 }
 
-                // Price button
+                // Price
                 HStack(spacing: 4) {
-                    Text("🪙")
+                    CoinIcon(size: 14)
                     Text("\(item.price)")
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                 }
@@ -226,10 +240,10 @@ struct StoreItemCard: View {
         .buttonStyle(PlainButtonStyle())
     }
 
-    private func boostPill(_ emoji: String, value: Int, color: Color) -> some View {
+    private func boostPill(_ symbol: String, value: Int, color: Color) -> some View {
         HStack(spacing: 2) {
-            Text(emoji).font(.system(size: 10))
-            Text("+\(value)").font(.system(size: 10, weight: .bold))
+            Image(systemName: symbol).font(.system(size: 9))
+            Text("+\(value)").font(.system(size: 9, weight: .bold))
         }
         .foregroundColor(color)
         .padding(.horizontal, 5)

@@ -6,9 +6,7 @@ struct BuildView: View {
     @Environment(\.dismiss) var dismiss
 
     @State private var selectedInventoryItem: StoreItem? = nil
-    @State private var draggingPosition: CGPoint = .zero
-    @State private var isDragging = false
-    @State private var placedFeedback: String? = nil
+    @State private var placedFeedback: String?           = nil
 
     var body: some View {
         NavigationView {
@@ -16,17 +14,14 @@ struct BuildView: View {
                 Color.xBackground.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    // Preview garden
                     gardenCanvas
                         .frame(height: 320)
 
                     Divider().padding(.vertical, 4)
 
-                    // Inventory row
                     inventorySection
                 }
 
-                // Placement feedback
                 if let msg = placedFeedback {
                     Text(msg)
                         .font(.system(size: 16, weight: .bold, design: .rounded))
@@ -40,9 +35,13 @@ struct BuildView: View {
                         .frame(maxHeight: .infinity, alignment: .top)
                 }
             }
-            .navigationTitle("🏗️ 布置家园")
+            .navigationTitle("布置家园")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Image(systemName: "hammer.fill")
+                        .foregroundStyle(Color(red:0.40, green:0.72, blue:0.40))
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("完成") { dismiss() }
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
@@ -56,13 +55,9 @@ struct BuildView: View {
     private var gardenCanvas: some View {
         GeometryReader { geo in
             ZStack {
-                // Background
-                LinearGradient(
-                    colors: store.currentSeason.skyGradient,
-                    startPoint: .top, endPoint: .center
-                )
+                LinearGradient(colors: store.currentSeason.skyGradient,
+                               startPoint: .top, endPoint: .center)
 
-                // Grass
                 VStack {
                     Spacer()
                     RoundedRectangle(cornerRadius: 20)
@@ -70,17 +65,16 @@ struct BuildView: View {
                         .frame(height: geo.size.height * 0.45)
                 }
 
-                // Placed items
                 ForEach(store.homeItems) { item in
                     draggableItem(item: item, in: geo.size)
                 }
 
                 // Pet preview
-                Text(store.pet.type.idleEmoji)
-                    .font(.system(size: 50))
-                    .position(x: geo.size.width / 2, y: geo.size.height * 0.6)
+                Image(systemName: store.pet.type.sfSymbol)
+                    .font(.system(size: 46, weight: .semibold))
+                    .foregroundStyle(store.pet.type.bodyColor)
+                    .position(x: geo.size.width / 2, y: geo.size.height * 0.60)
 
-                // Drop zone hint
                 if let selected = selectedInventoryItem {
                     dropZoneHint(selected, in: geo.size)
                 }
@@ -95,18 +89,15 @@ struct BuildView: View {
     }
 
     private func draggableItem(item: HomeItem, in size: CGSize) -> some View {
-        Text(item.storeItem.emoji)
-            .font(.system(size: 36))
+        Image(systemName: item.storeItem.sfSymbol)
+            .font(.system(size: 30, weight: .semibold))
+            .foregroundStyle(item.storeItem.symbolColor)
+            .shadow(color: .black.opacity(0.10), radius: 2, x: 0, y: 1)
             .position(
-                x: max(20, min(size.width - 20, item.positionX)),
+                x: max(20, min(size.width  - 20, item.positionX)),
                 y: max(20, min(size.height - 20, item.positionY))
             )
-            .gesture(
-                DragGesture()
-                    .onChanged { value in
-                        store.moveItem(item, to: value.location)
-                    }
-            )
+            .gesture(DragGesture().onEnded { store.moveItem(item, to: $0.location) })
             .contextMenu {
                 Button(role: .destructive) {
                     withAnimation { store.removeHomeItem(item) }
@@ -118,13 +109,15 @@ struct BuildView: View {
 
     private func dropZoneHint(_ item: StoreItem, in size: CGSize) -> some View {
         VStack(spacing: 4) {
-            Text(item.emoji).font(.system(size: 30))
+            Image(systemName: item.sfSymbol)
+                .font(.system(size: 28, weight: .semibold))
+                .foregroundStyle(item.symbolColor)
             Text("点击草地放置")
                 .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundColor(.white)
         }
         .padding(10)
-        .background(Color.black.opacity(0.4))
+        .background(Color.black.opacity(0.38))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .position(x: size.width / 2, y: 40)
     }
@@ -138,11 +131,9 @@ struct BuildView: View {
                     .foregroundColor(Color.xText)
                 Spacer()
                 if selectedInventoryItem != nil {
-                    Button("取消选择") {
-                        selectedInventoryItem = nil
-                    }
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundColor(Color.xAccent)
+                    Button("取消选择") { selectedInventoryItem = nil }
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(Color.xAccent)
                 }
             }
             .padding(.horizontal, 16)
@@ -171,13 +162,15 @@ struct BuildView: View {
             }
         }) {
             VStack(spacing: 6) {
-                Text(item.emoji).font(.system(size: 30))
+                Image(systemName: item.sfSymbol)
+                    .font(.system(size: 28, weight: .semibold))
+                    .foregroundStyle(item.symbolColor)
                 Text(item.name)
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundColor(Color.xText)
             }
             .padding(12)
-            .background(isSelected ? Color.xPrimary.opacity(0.2) : Color.xCard)
+            .background(isSelected ? Color.xPrimary.opacity(0.18) : Color.xCard)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -190,6 +183,9 @@ struct BuildView: View {
 
     private var emptyInventory: some View {
         VStack(spacing: 8) {
+            Image(systemName: "bag.fill")
+                .font(.system(size: 30))
+                .foregroundStyle(Color.xSubtext.opacity(0.4))
             Text("背包是空的～")
                 .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundColor(Color.xSubtext)
@@ -198,14 +194,13 @@ struct BuildView: View {
                 .foregroundColor(Color.xSubtext.opacity(0.7))
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 30)
+        .padding(.vertical, 28)
     }
 
-    // MARK: - Place item action
     private func placeItem(_ item: StoreItem, at position: CGPoint) {
         store.placeItem(item, at: position)
         selectedInventoryItem = nil
-        let msg = "\(item.emoji) \(item.name) 放好了！"
+        let msg = "\(item.name) 放好了！"
         withAnimation(.bouncy) { placedFeedback = msg }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             withAnimation { placedFeedback = nil }

@@ -15,7 +15,7 @@ struct MainGardenView: View {
 
     var body: some View {
         ZStack {
-            // Sky background
+            // Sky gradient
             LinearGradient(
                 colors: store.currentSeason.skyGradient,
                 startPoint: .top,
@@ -23,10 +23,10 @@ struct MainGardenView: View {
             )
             .ignoresSafeArea()
 
-            // Weather particles
+            // Weather particle overlay
             WeatherOverlayView(weather: store.currentWeather)
 
-            // Ground / grass
+            // Grass ground
             VStack(spacing: 0) {
                 Spacer()
                 RoundedRectangle(cornerRadius: 30, style: .continuous)
@@ -36,10 +36,10 @@ struct MainGardenView: View {
             }
             .ignoresSafeArea(edges: .bottom)
 
-            // Placed garden items
+            // Placed garden items (draggable)
             gardenItemsLayer
 
-            // Main pet (center)
+            // Pet (center stage)
             VStack {
                 Spacer()
                 PetAnimationView(pet: store.pet, size: 110) {
@@ -48,7 +48,7 @@ struct MainGardenView: View {
                 .padding(.bottom, 120)
             }
 
-            // Coin animation overlay
+            // Coin fly animation
             if store.showCoinAnimation {
                 VStack {
                     CoinFlyView(delta: store.lastCoinDelta)
@@ -58,7 +58,7 @@ struct MainGardenView: View {
                 .allowsHitTesting(false)
             }
 
-            // UI overlay
+            // UI chrome
             VStack {
                 topBar
                 Spacer()
@@ -83,37 +83,35 @@ struct MainGardenView: View {
 
     // MARK: - Top bar
     private var topBar: some View {
-        HStack(alignment: .top) {
-            // Season / weather info
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 4) {
-                    Text(store.currentSeason.emoji)
-                    Text(store.currentSeason.displayName)
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color.xText)
-                }
-                HStack(spacing: 4) {
-                    Text(store.currentWeather.emoji)
-                    Text(store.currentWeather.displayName)
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .foregroundColor(Color.xSubtext)
-                }
+        HStack(alignment: .top, spacing: 10) {
+            // Season + weather chip
+            HStack(spacing: 6) {
+                Image(systemName: store.currentSeason.sfSymbol)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(store.currentSeason.symbolColor)
+                Text(store.currentSeason.displayName)
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundColor(Color.xText)
+                Image(systemName: store.currentWeather.sfSymbol)
+                    .font(.system(size: 13))
+                    .foregroundStyle(store.currentWeather.symbolColor)
             }
-            .padding(10)
-            .cardStyle(cornerRadius: 16)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .cardStyle(cornerRadius: 14)
 
             Spacer()
 
             // Coin badge
             CoinBadgeView(coins: store.coins)
 
-            // Parent entry button (small, tucked in corner)
+            // Parent entry
             Button(action: onParentTap) {
                 Image(systemName: "lock.shield.fill")
                     .font(.system(size: 18))
-                    .foregroundColor(Color.xSubtext)
+                    .foregroundStyle(Color.xSubtext)
                     .padding(10)
-                    .background(Color.xCard.opacity(0.8))
+                    .background(Color.xCard.opacity(0.85))
                     .clipShape(Circle())
             }
         }
@@ -121,37 +119,49 @@ struct MainGardenView: View {
         .padding(.top, 8)
     }
 
-    // MARK: - Bottom navigation
+    // MARK: - Bottom navigation (all SF Symbols)
     private var bottomNav: some View {
-        HStack(spacing: 12) {
-            navButton(emoji: "🛍️", label: "商店")    { activeSheet = .shop  }
-            navButton(emoji: "🏗️", label: "建造")    { activeSheet = .build }
-            navButton(emoji: "📋", label: "今日任务") { activeSheet = .tasks }
+        HStack(spacing: 0) {
+            navButton(symbol: "bag.fill",
+                      color: Color(red:1.0, green:0.55, blue:0.20),
+                      label: "商店")       { activeSheet = .shop  }
+            navButton(symbol: "hammer.fill",
+                      color: Color(red:0.40, green:0.72, blue:0.40),
+                      label: "建造")       { activeSheet = .build }
+            navButton(symbol: "list.bullet.clipboard.fill",
+                      color: Color(red:0.35, green:0.65, blue:1.0),
+                      label: "今日任务")   { activeSheet = .tasks }
                 .overlay(taskBadge, alignment: .topTrailing)
-            navButton(emoji: "⭐", label: "成就")    { activeSheet = .album }
+            navButton(symbol: "trophy.fill",
+                      color: Color(red:1.0, green:0.78, blue:0.20),
+                      label: "成就")       { activeSheet = .album }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
         .background(
-            Color.xCard.opacity(0.95)
-                .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
-                .shadow(color: .black.opacity(0.12), radius: 12, x: 0, y: -4)
+            Color.xCard.opacity(0.96)
+                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                .shadow(color: .black.opacity(0.10), radius: 12, x: 0, y: -4)
         )
         .padding(.horizontal, 12)
         .padding(.bottom, 8)
     }
 
-    private func navButton(emoji: String, label: String, action: @escaping () -> Void) -> some View {
+    private func navButton(symbol: String, color: Color, label: String,
+                           action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            VStack(spacing: 4) {
-                Text(emoji).font(.system(size: 26))
+            VStack(spacing: 5) {
+                Image(systemName: symbol)
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(color)
                 Text(label)
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .font(.system(size: 10, weight: .semibold, design: .rounded))
                     .foregroundColor(Color.xText)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
+            .padding(.vertical, 6)
         }
+        .buttonStyle(ScaleButtonStyle())
     }
 
     private var taskBadge: some View {
@@ -164,34 +174,42 @@ struct MainGardenView: View {
                     .padding(4)
                     .background(Color.xDanger)
                     .clipShape(Circle())
-                    .offset(x: 4, y: -4)
+                    .offset(x: 2, y: -2)
             }
         }
     }
 
-    // MARK: - Grass decoration
+    // MARK: - Grass decoration (SF Symbols, no emoji)
     private var grassDecoration: some View {
-        HStack(spacing: 16) {
-            ForEach(["🌿", "🌱", "🍀", "🌸"].indices, id: \.self) { i in
-                Text(["🌿", "🌱", "🍀", "🌸"][i]).font(.system(size: 20))
+        let plants: [(symbol: String, color: Color)] = [
+            ("leaf.fill",   Color(red: 0.35, green: 0.75, blue: 0.40)),
+            ("leaf.fill",   Color(red: 0.45, green: 0.80, blue: 0.30)),
+            ("staroflife.fill", Color(red: 0.95, green: 0.55, blue: 0.70)),
+            ("leaf.fill",   Color(red: 0.30, green: 0.70, blue: 0.45)),
+        ]
+        return HStack(spacing: 14) {
+            ForEach(plants.indices, id: \.self) { i in
+                Image(systemName: plants[i].symbol)
+                    .font(.system(size: 18))
+                    .foregroundStyle(plants[i].color)
             }
         }
-        .padding(.top, -12)
-        .padding(.leading, 20)
+        .padding(.top, -10)
+        .padding(.leading, 18)
     }
 
-    // MARK: - Garden items
+    // MARK: - Garden items layer
     private var gardenItemsLayer: some View {
         ZStack {
             ForEach(store.homeItems) { item in
-                Text(item.storeItem.emoji)
-                    .font(.system(size: 36))
+                Image(systemName: item.storeItem.sfSymbol)
+                    .font(.system(size: 32, weight: .semibold))
+                    .foregroundStyle(item.storeItem.symbolColor)
+                    .shadow(color: .black.opacity(0.12), radius: 3, x: 0, y: 2)
                     .position(x: item.positionX, y: item.positionY)
                     .gesture(
                         DragGesture()
-                            .onEnded { value in
-                                store.moveItem(item, to: value.location)
-                            }
+                            .onEnded { store.moveItem(item, to: $0.location) }
                     )
             }
         }

@@ -1,27 +1,25 @@
 import SwiftUI
 
-// MARK: - Parent Settings View (基础设置)
+// MARK: - Parent Settings View
 struct ParentSettingsView: View {
     @EnvironmentObject var store: GameStore
 
-    @State private var petName: String = ""
-    @State private var currentPassword: String = ""
-    @State private var newPassword: String = ""
-    @State private var confirmPassword: String = ""
-    @State private var showPasswordSection = false
-    @State private var passwordError: String? = nil
-    @State private var showSaveSuccess = false
-    @State private var showExitConfirm = false
+    @State private var petName:          String   = ""
+    @State private var currentPassword:  String   = ""
+    @State private var newPassword:      String   = ""
+    @State private var confirmPassword:  String   = ""
+    @State private var passwordError:    String?  = nil
+    @State private var showSaveSuccess           = false
+    @State private var showExitConfirm           = false
     @State private var petTypeSelection: PetType = .cat
 
     var body: some View {
         NavigationView {
             Form {
-                // Pet settings
+                // Pet
                 Section("宠物设置") {
                     HStack {
-                        Text("宠物名字")
-                            .font(.system(size: 15, design: .rounded))
+                        Label("宠物名字", systemImage: "pencil")
                         Spacer()
                         TextField("小毛球", text: $petName)
                             .multilineTextAlignment(.trailing)
@@ -31,79 +29,82 @@ struct ParentSettingsView: View {
 
                     Picker("宠物类型", selection: $petTypeSelection) {
                         ForEach(PetType.allCases, id: \.self) { type in
-                            HStack {
-                                Text(type.idleEmoji)
+                            Label {
                                 Text(type.displayName)
+                            } icon: {
+                                Image(systemName: type.sfSymbol)
                             }
                             .tag(type)
                         }
                     }
 
                     Button(action: savePetSettings) {
-                        Text("保存宠物设置")
+                        Label("保存宠物设置", systemImage: "checkmark.circle")
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundColor(Color.xPrimary)
                     }
                 }
 
-                // Sound settings
+                // Sound
                 Section("声音设置") {
                     Toggle(isOn: $store.soundEnabled) {
-                        Label("游戏音效", systemImage: store.soundEnabled ? "speaker.wave.2" : "speaker.slash")
+                        Label(
+                            store.soundEnabled ? "游戏音效已开启" : "游戏音效已关闭",
+                            systemImage: store.soundEnabled ? "speaker.wave.2.fill" : "speaker.slash.fill"
+                        )
+                        .font(.system(size: 15, design: .rounded))
                     }
                     .tint(Color.xPrimary)
-                    .font(.system(size: 15, design: .rounded))
                 }
 
-                // Password change
+                // Password
                 Section("修改密码") {
                     SecureField("当前密码", text: $currentPassword)
                         .font(.system(size: 15, design: .rounded))
-
                     SecureField("新密码（4位数字）", text: $newPassword)
                         .font(.system(size: 15, design: .rounded))
                         .keyboardType(.numberPad)
-
                     SecureField("确认新密码", text: $confirmPassword)
                         .font(.system(size: 15, design: .rounded))
                         .keyboardType(.numberPad)
-
                     if let err = passwordError {
-                        Text(err)
+                        Label(err, systemImage: "exclamationmark.circle.fill")
                             .font(.system(size: 12, design: .rounded))
                             .foregroundColor(Color.xDanger)
                     }
-
                     Button(action: changePassword) {
-                        Text("修改密码")
+                        Label("修改密码", systemImage: "lock.rotation")
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundColor(Color.xDanger)
                     }
                 }
 
-                // Game data
+                // Stats
                 Section("数据信息") {
-                    dataRow(label: "总获金币", value: "\(store.totalCoinsEarned) 🪙")
-                    dataRow(label: "当前金币", value: "\(store.coins) 🪙")
-                    dataRow(label: "历史记录天数", value: "\(store.taskHistory.count) 天")
-                    dataRow(label: "已解锁成就", value: "\(store.achievements.filter { $0.isUnlocked }.count) 个")
+                    dataRow(label: "总获金币", value: "\(store.totalCoinsEarned)",
+                            symbol: "circle.fill", color: Color.xCoin)
+                    dataRow(label: "当前金币", value: "\(store.coins)",
+                            symbol: "circle.fill", color: Color.xCoin)
+                    dataRow(label: "历史记录", value: "\(store.taskHistory.count) 天",
+                            symbol: "calendar", color: Color.xPrimary)
+                    dataRow(label: "已解锁成就", value: "\(store.achievements.filter { $0.isUnlocked }.count) 个",
+                            symbol: "trophy.fill", color: Color(red:1.0, green:0.78, blue:0.20))
                 }
 
-                // Exit parent mode
+                // Exit
                 Section {
                     Button(action: { showExitConfirm = true }) {
                         HStack {
                             Spacer()
-                            Image(systemName: "arrow.left.circle.fill")
-                            Text("退出家长模式")
+                            Label("退出家长模式", systemImage: "arrow.uturn.left.circle.fill")
                                 .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color.xSubtext)
                             Spacer()
                         }
-                        .foregroundColor(Color.xSubtext)
                     }
                 }
             }
-            .navigationTitle("⚙️ 设置")
+            .navigationTitle("设置")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 petName = store.pet.name
@@ -112,11 +113,10 @@ struct ParentSettingsView: View {
             .overlay(
                 Group {
                     if showSaveSuccess {
-                        Text("保存成功 ✓")
+                        Label("保存成功", systemImage: "checkmark.circle.fill")
                             .font(.system(size: 14, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
+                            .padding(.horizontal, 20).padding(.vertical, 10)
                             .background(Color.xSecondary)
                             .clipShape(Capsule())
                             .padding(.top, 20)
@@ -126,19 +126,18 @@ struct ParentSettingsView: View {
                 }
             )
             .confirmationDialog("退出家长模式？", isPresented: $showExitConfirm, titleVisibility: .visible) {
-                Button("退出") {
-                    store.isParentMode = false
-                }
+                Button("退出") { store.isParentMode = false }
                 Button("取消", role: .cancel) {}
             }
         }
     }
 
-    private func dataRow(label: String, value: String) -> some View {
+    private func dataRow(label: String, value: String, symbol: String, color: Color) -> some View {
         HStack {
-            Text(label)
+            Label(label, systemImage: symbol)
                 .font(.system(size: 14, design: .rounded))
                 .foregroundColor(Color.xText)
+                .labelStyle(.titleAndIcon)
             Spacer()
             Text(value)
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -160,25 +159,14 @@ struct ParentSettingsView: View {
 
     private func changePassword() {
         passwordError = nil
-
-        guard currentPassword == store.parentPassword else {
-            passwordError = "当前密码不正确"
-            return
-        }
+        guard currentPassword == store.parentPassword else { passwordError = "当前密码不正确"; return }
         guard newPassword.count == 4, newPassword.allSatisfy({ $0.isNumber }) else {
-            passwordError = "新密码必须是4位数字"
-            return
+            passwordError = "新密码必须是4位数字"; return
         }
-        guard newPassword == confirmPassword else {
-            passwordError = "两次输入的密码不一致"
-            return
-        }
-
+        guard newPassword == confirmPassword else { passwordError = "两次输入的密码不一致"; return }
         store.parentPassword = newPassword
         store.saveState()
-        currentPassword  = ""
-        newPassword      = ""
-        confirmPassword  = ""
+        currentPassword = ""; newPassword = ""; confirmPassword = ""
         withAnimation(.bouncy) { showSaveSuccess = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             withAnimation { showSaveSuccess = false }

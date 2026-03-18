@@ -18,6 +18,27 @@ enum TaskCategory: String, Codable, CaseIterable {
         }
     }
 
+    var sfSymbol: String {
+        switch self {
+        case .hygiene:   return "drop.fill"
+        case .selfCare:  return "person.crop.circle.fill"
+        case .housework: return "sparkles"
+        case .emotion:   return "heart.fill"
+        case .learning:  return "book.fill"
+        }
+    }
+
+    var symbolColor: Color {
+        switch self {
+        case .hygiene:   return Color(red: 0.30, green: 0.65, blue: 1.0)
+        case .selfCare:  return Color(red: 1.0,  green: 0.60, blue: 0.20)
+        case .housework: return Color(red: 0.35, green: 0.80, blue: 0.55)
+        case .emotion:   return Color(red: 1.0,  green: 0.40, blue: 0.60)
+        case .learning:  return Color(red: 0.55, green: 0.35, blue: 0.90)
+        }
+    }
+
+    // Legacy
     var emoji: String {
         switch self {
         case .hygiene:   return "🪥"

@@ -1,9 +1,23 @@
 import SwiftUI
 
-// MARK: - Achievement / Album View (成长相册/成就页)
+// MARK: - Achievement / Album View
 struct AchievementView: View {
     @EnvironmentObject var store: GameStore
     @Environment(\.dismiss) var dismiss
+
+    // Map achievement id → SF Symbol
+    private static let symbolMap: [String: (symbol: String, color: Color)] = [
+        "first_task":        ("star.fill",                    .yellow),
+        "week_streak":       ("trophy.fill",                  Color(red:1.0, green:0.78, blue:0.20)),
+        "first_home_item":   ("house.fill",                   Color(red:0.55, green:0.75, blue:0.35)),
+        "pet_happy":         ("heart.fill",                   .pink),
+        "shop_first":        ("bag.fill",                     Color(red:1.0, green:0.55, blue:0.20)),
+        "coins_10":          ("circle.fill",                  .yellow),
+        "coins_50":          ("circle.fill",                  Color(red:1.0, green:0.82, blue:0.20)),
+        "three_tasks_day":   ("sparkles",                     .orange),
+        "spring_decoration": ("leaf.fill",                    .green),
+        "winter_decoration": ("snowflake",                    Color(red:0.60, green:0.80, blue:1.0)),
+    ]
 
     private let columns = [GridItem(.adaptive(minimum: 140), spacing: 14)]
 
@@ -11,33 +25,35 @@ struct AchievementView: View {
         NavigationView {
             ZStack {
                 Color.xBackground.ignoresSafeArea()
-
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
-                        // Stats row
                         statsRow
-
-                        // Achievement grid
                         LazyVGrid(columns: columns, spacing: 14) {
                             ForEach(store.achievements) { achievement in
-                                AchievementCard(achievement: achievement)
+                                AchievementCard(
+                                    achievement: achievement,
+                                    sfSymbol: Self.symbolMap[achievement.id]?.symbol ?? "star.fill",
+                                    symbolColor: Self.symbolMap[achievement.id]?.color ?? .yellow
+                                )
                             }
                         }
                         .padding(.horizontal, 16)
 
-                        // History preview
                         if !store.taskHistory.isEmpty {
                             historySection
                         }
-
                         Spacer(minLength: 30)
                     }
                     .padding(.top, 12)
                 }
             }
-            .navigationTitle("⭐ 成长相册")
+            .navigationTitle("成长相册")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Image(systemName: "trophy.fill")
+                        .foregroundStyle(Color(red:1.0, green:0.78, blue:0.20))
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("关闭") { dismiss() }
                         .foregroundColor(Color.xPrimary)
@@ -47,25 +63,29 @@ struct AchievementView: View {
         }
     }
 
-    // MARK: - Stats row
     private var statsRow: some View {
         HStack(spacing: 0) {
-            statCell(value: "\(store.totalCoinsEarned)", label: "获得金币", emoji: "🪙")
+            statCell(value: "\(store.totalCoinsEarned)", label: "获得金币",
+                     symbol: "circle.fill", color: .yellow)
             Divider().frame(height: 40)
-            statCell(value: "\(store.taskHistory.count)", label: "完成天数", emoji: "📅")
+            statCell(value: "\(store.taskHistory.count)", label: "完成天数",
+                     symbol: "calendar", color: Color.xPrimary)
             Divider().frame(height: 40)
-            statCell(value: "\(store.achievements.filter { $0.isUnlocked }.count)", label: "成就解锁", emoji: "🏆")
+            statCell(value: "\(store.achievements.filter { $0.isUnlocked }.count)", label: "成就解锁",
+                     symbol: "trophy.fill", color: Color(red:1.0, green:0.78, blue:0.20))
         }
         .padding(.vertical, 14)
         .cardStyle()
         .padding(.horizontal, 16)
     }
 
-    private func statCell(value: String, label: String, emoji: String) -> some View {
+    private func statCell(value: String, label: String, symbol: String, color: Color) -> some View {
         VStack(spacing: 4) {
-            Text(emoji).font(.system(size: 22))
+            Image(systemName: symbol)
+                .font(.system(size: 20))
+                .foregroundStyle(color)
             Text(value)
-                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundColor(Color.xText)
             Text(label)
                 .font(.system(size: 11, design: .rounded))
@@ -74,11 +94,12 @@ struct AchievementView: View {
         .frame(maxWidth: .infinity)
     }
 
-    // MARK: - History section
     private var historySection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("📖 最近记录")
+                Image(systemName: "book.fill")
+                    .foregroundStyle(Color.xPrimary)
+                Text("最近记录")
                     .font(.system(size: 16, weight: .bold, design: .rounded))
                     .foregroundColor(Color.xText)
                 Spacer()
@@ -95,19 +116,27 @@ struct AchievementView: View {
 // MARK: - Achievement Card
 struct AchievementCard: View {
     let achievement: Achievement
+    let sfSymbol: String
+    let symbolColor: Color
 
     var body: some View {
         VStack(spacing: 10) {
             ZStack {
                 Circle()
                     .fill(achievement.isUnlocked
-                          ? Color.xPrimary.opacity(0.2)
-                          : Color.gray.opacity(0.1))
+                          ? symbolColor.opacity(0.18)
+                          : Color.gray.opacity(0.10))
                     .frame(width: 64, height: 64)
 
-                Text(achievement.isUnlocked ? achievement.emoji : "🔒")
-                    .font(.system(size: 36))
-                    .grayscale(achievement.isUnlocked ? 0 : 1.0)
+                if achievement.isUnlocked {
+                    Image(systemName: sfSymbol)
+                        .font(.system(size: 30, weight: .semibold))
+                        .foregroundStyle(symbolColor)
+                } else {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 26))
+                        .foregroundStyle(Color.gray.opacity(0.5))
+                }
             }
 
             Text(achievement.title)
@@ -129,7 +158,7 @@ struct AchievementCard: View {
         }
         .padding(14)
         .cardStyle()
-        .opacity(achievement.isUnlocked ? 1.0 : 0.6)
+        .opacity(achievement.isUnlocked ? 1.0 : 0.58)
     }
 }
 
@@ -139,7 +168,6 @@ struct HistoryRowView: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            // Date
             VStack(alignment: .center, spacing: 2) {
                 Text(dayString)
                     .font(.system(size: 18, weight: .bold, design: .rounded))
@@ -150,24 +178,26 @@ struct HistoryRowView: View {
             }
             .frame(width: 40)
 
-            // Divider
             Rectangle()
                 .fill(Color.xPrimary.opacity(0.4))
                 .frame(width: 2, height: 44)
                 .clipShape(Capsule())
 
-            // Info
             VStack(alignment: .leading, spacing: 4) {
                 let approved = record.tasks.filter { $0.isApproved }.count
                 Text("完成了 \(approved)/\(record.tasks.count) 个任务")
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundColor(Color.xText)
                 HStack(spacing: 6) {
-                    Text("🪙 +\(record.coinsEarned)")
+                    CoinIcon(size: 12)
+                    Text("+\(record.coinsEarned)")
                         .font(.system(size: 12, design: .rounded))
                         .foregroundColor(Color.xCoin)
                     if record.coinsDeducted > 0 {
-                        Text("🔻 -\(record.coinsDeducted)")
+                        Image(systemName: "arrow.down.circle.fill")
+                            .font(.system(size: 11))
+                            .foregroundStyle(Color.xDanger)
+                        Text("-\(record.coinsDeducted)")
                             .font(.system(size: 12, design: .rounded))
                             .foregroundColor(Color.xDanger)
                     }
@@ -176,13 +206,13 @@ struct HistoryRowView: View {
 
             Spacer()
 
-            // Completion indicator
             ZStack {
                 Circle()
-                    .stroke(Color.xSubtext.opacity(0.2), lineWidth: 3)
+                    .stroke(Color.xSubtext.opacity(0.18), lineWidth: 3)
                 Circle()
                     .trim(from: 0, to: record.completionRate)
-                    .stroke(Color.xSecondary, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .stroke(Color.xSecondary,
+                            style: StrokeStyle(lineWidth: 3, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                 Text("\(Int(record.completionRate * 100))%")
                     .font(.system(size: 9, weight: .bold, design: .rounded))
@@ -196,14 +226,9 @@ struct HistoryRowView: View {
     }
 
     private var dayString: String {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "d"
-        return fmt.string(from: record.date)
+        let f = DateFormatter(); f.dateFormat = "d"; return f.string(from: record.date)
     }
-
     private var monthString: String {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "M月"
-        return fmt.string(from: record.date)
+        let f = DateFormatter(); f.dateFormat = "M月"; return f.string(from: record.date)
     }
 }

@@ -17,6 +17,25 @@ enum Season: String, Codable, CaseIterable {
         }
     }
 
+    var sfSymbol: String {
+        switch self {
+        case .spring: return "leaf.fill"
+        case .summer: return "sun.max.fill"
+        case .autumn: return "wind"
+        case .winter: return "snowflake"
+        }
+    }
+
+    var symbolColor: Color {
+        switch self {
+        case .spring: return Color(red: 0.95, green: 0.55, blue: 0.75)
+        case .summer: return Color(red: 1.0,  green: 0.78, blue: 0.20)
+        case .autumn: return Color(red: 0.92, green: 0.55, blue: 0.20)
+        case .winter: return Color(red: 0.60, green: 0.80, blue: 1.0)
+        }
+    }
+
+    // Legacy, kept for any String comparison
     var emoji: String {
         switch self {
         case .spring: return "🌸"
@@ -81,6 +100,34 @@ enum Weather: String, Codable, CaseIterable {
         }
     }
 
+    var sfSymbol: String {
+        switch self {
+        case .sunny:  return "sun.max.fill"
+        case .cloudy: return "cloud.fill"
+        case .rainy:  return "cloud.rain.fill"
+        case .snowy:  return "cloud.snow.fill"
+        }
+    }
+
+    var symbolColor: Color {
+        switch self {
+        case .sunny:  return Color(red: 1.0, green: 0.78, blue: 0.20)
+        case .cloudy: return Color(red: 0.70, green: 0.75, blue: 0.82)
+        case .rainy:  return Color(red: 0.45, green: 0.60, blue: 0.90)
+        case .snowy:  return Color(red: 0.75, green: 0.88, blue: 1.0)
+        }
+    }
+
+    // SF Symbol used for falling particle animation
+    var particleSymbol: String? {
+        switch self {
+        case .sunny, .cloudy: return nil
+        case .rainy:  return "drop.fill"
+        case .snowy:  return "snowflake"
+        }
+    }
+
+    // Legacy
     var emoji: String {
         switch self {
         case .sunny:  return "☀️"
@@ -90,13 +137,5 @@ enum Weather: String, Codable, CaseIterable {
         }
     }
 
-    // Weather particle effect symbol
-    var particle: String? {
-        switch self {
-        case .sunny:  return nil
-        case .cloudy: return nil
-        case .rainy:  return "💧"
-        case .snowy:  return "❄️"
-        }
-    }
+    var particle: String? { particleSymbol }
 }

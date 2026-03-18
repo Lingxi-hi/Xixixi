@@ -13,26 +13,26 @@ enum PetType: String, Codable, CaseIterable {
         }
     }
 
-    var idleEmoji: String {
+    // SF Symbol name (iOS 16 / SF Symbols 4)
+    var sfSymbol: String {
         switch self {
-        case .cat: return "🐱"
-        case .dog: return "🐶"
+        case .cat: return "cat"
+        case .dog: return "dog"
         }
     }
 
-    var happyEmoji: String {
+    // Body tint color
+    var bodyColor: Color {
         switch self {
-        case .cat: return "😸"
-        case .dog: return "🐕"
+        case .cat: return Color(red: 1.0, green: 0.78, blue: 0.50)
+        case .dog: return Color(red: 0.85, green: 0.65, blue: 0.42)
         }
     }
 
-    var sadEmoji: String {
-        switch self {
-        case .cat: return "😿"
-        case .dog: return "🐩"
-        }
-    }
+    // Legacy emoji kept for codable compatibility — not used in UI
+    var idleEmoji:  String { self == .cat ? "🐱" : "🐶" }
+    var happyEmoji: String { self == .cat ? "😸" : "🐕" }
+    var sadEmoji:   String { self == .cat ? "😿" : "🐩" }
 }
 
 // MARK: - Pet Mood
@@ -46,30 +46,31 @@ enum PetMood: String, Codable {
     var description: String {
         switch self {
         case .ecstatic: return "超级开心！"
-        case .happy: return "很开心～"
-        case .content: return "还不错哦"
-        case .sad: return "有点难过..."
-        case .unhappy: return "好难过呀..."
+        case .happy:    return "很开心～"
+        case .content:  return "还不错哦"
+        case .sad:      return "有点难过..."
+        case .unhappy:  return "好难过呀..."
         }
     }
 
-    var emoji: String {
+    // SF Symbol for mood bubble overlay
+    var sfSymbol: String {
         switch self {
-        case .ecstatic: return "🥰"
-        case .happy: return "😊"
-        case .content: return "😌"
-        case .sad: return "😔"
-        case .unhappy: return "😢"
+        case .ecstatic: return "star.fill"
+        case .happy:    return "heart.fill"
+        case .content:  return "face.smiling"
+        case .sad:      return "cloud.drizzle.fill"
+        case .unhappy:  return "cloud.rain.fill"
         }
     }
 
     var color: Color {
         switch self {
-        case .ecstatic: return .yellow
-        case .happy: return .green
-        case .content: return .mint
-        case .sad: return .gray
-        case .unhappy: return .blue
+        case .ecstatic: return Color(red: 1.0, green: 0.82, blue: 0.2)
+        case .happy:    return Color(red: 0.35, green: 0.80, blue: 0.55)
+        case .content:  return Color(red: 0.45, green: 0.78, blue: 0.80)
+        case .sad:      return Color(red: 0.60, green: 0.60, blue: 0.65)
+        case .unhappy:  return Color(red: 0.45, green: 0.60, blue: 0.85)
         }
     }
 }
@@ -85,7 +86,6 @@ struct Pet: Codable, Identifiable {
     var thirst: Int      // 饮水度
     var moodScore: Int   // 心情值
 
-    // Computed mood level
     var mood: PetMood {
         switch moodScore {
         case 81...100: return .ecstatic
@@ -96,15 +96,11 @@ struct Pet: Codable, Identifiable {
         }
     }
 
-    // Whether the pet needs attention
-    var needsFood: Bool   { hunger < 40 }
-    var needsWater: Bool  { thirst < 40 }
-    var needsLove: Bool   { moodScore < 40 }
+    var needsFood:  Bool { hunger    < 40 }
+    var needsWater: Bool { thirst    < 40 }
+    var needsLove:  Bool { moodScore < 40 }
 
-    // Overall health status affects pet interaction
-    var overallStatus: Int {
-        (hunger + thirst + moodScore) / 3
-    }
+    var overallStatus: Int { (hunger + thirst + moodScore) / 3 }
 
     static func makeDefault(type: PetType = .cat, name: String = "小毛球") -> Pet {
         Pet(type: type, name: name, hunger: 80, thirst: 80, moodScore: 85)
