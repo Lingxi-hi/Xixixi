@@ -34,6 +34,7 @@
 		A065 /* DailySettlementView.swift in Sources */   = {isa = PBXBuildFile; fileRef = F065; };
 		A066 /* HistoryView.swift in Sources */           = {isa = PBXBuildFile; fileRef = F066; };
 		A067 /* ParentSettingsView.swift in Sources */    = {isa = PBXBuildFile; fileRef = F067; };
+		R001 /* Assets.xcassets in Resources */           = {isa = PBXBuildFile; fileRef = RF001; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -65,6 +66,7 @@
 		F066 /* HistoryView.swift */           = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		F067 /* ParentSettingsView.swift */    = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentSettingsView.swift; sourceTree = "<group>"; };
 		FPROD /* Xixixi.app */                 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Xixixi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		RF001 /* Assets.xcassets */            = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,8 +101,15 @@
 				GRP_STORE,
 				GRP_EXTENSIONS,
 				GRP_VIEWS,
+				GRP_RESOURCES,
 			);
 			path = Xixixi;
+			sourceTree = "<group>";
+		};
+		GRP_RESOURCES = {
+			isa = PBXGroup;
+			children = (RF001,);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		GRP_APP = {
@@ -197,7 +206,7 @@
 		BUILD_RESOURCES = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = ();
+			files = (R001,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
