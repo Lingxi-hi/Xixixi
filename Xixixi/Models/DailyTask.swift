@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 // MARK: - Task Category
 enum TaskCategory: String, Codable, CaseIterable {
