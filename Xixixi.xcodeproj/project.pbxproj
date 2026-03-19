@@ -19,6 +19,7 @@
 		A030 /* Color+Theme.swift in Sources */           = {isa = PBXBuildFile; fileRef = F030; };
 		A040 /* CoinBadgeView.swift in Sources */         = {isa = PBXBuildFile; fileRef = F040; };
 		A041 /* PetAnimationView.swift in Sources */      = {isa = PBXBuildFile; fileRef = F041; };
+		A042 /* GardenSceneView.swift in Sources */       = {isa = PBXBuildFile; fileRef = F042; };
 		A050 /* MainGardenView.swift in Sources */        = {isa = PBXBuildFile; fileRef = F050; };
 		A051 /* PetInteractionView.swift in Sources */    = {isa = PBXBuildFile; fileRef = F051; };
 		A052 /* StoreView.swift in Sources */             = {isa = PBXBuildFile; fileRef = F052; };
@@ -48,6 +49,7 @@
 		F030 /* Color+Theme.swift */           = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Theme.swift"; sourceTree = "<group>"; };
 		F040 /* CoinBadgeView.swift */         = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinBadgeView.swift; sourceTree = "<group>"; };
 		F041 /* PetAnimationView.swift */      = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetAnimationView.swift; sourceTree = "<group>"; };
+		F042 /* GardenSceneView.swift */       = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenSceneView.swift; sourceTree = "<group>"; };
 		F050 /* MainGardenView.swift */        = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainGardenView.swift; sourceTree = "<group>"; };
 		F051 /* PetInteractionView.swift */    = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetInteractionView.swift; sourceTree = "<group>"; };
 		F052 /* StoreView.swift */             = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreView.swift; sourceTree = "<group>"; };
@@ -133,7 +135,7 @@
 		};
 		GRP_SHARED = {
 			isa = PBXGroup;
-			children = (F040, F041);
+			children = (F040, F041, F042);
 			path = Shared;
 			sourceTree = "<group>";
 		};
@@ -209,7 +211,7 @@
 				A010, A011, A012, A013, A014, A015,
 				A020,
 				A030,
-				A040, A041,
+				A040, A041, A042,
 				A050, A051, A052, A053, A054, A055,
 				A060, A061, A062, A063, A064, A065, A066, A067,
 			);
