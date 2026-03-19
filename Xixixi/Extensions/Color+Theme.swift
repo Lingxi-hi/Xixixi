@@ -41,6 +41,15 @@ extension View {
     }
 }
 
+// MARK: - Scale press button style (shared across all views)
+struct ScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.94 : 1.0)
+            .animation(.bouncy, value: configuration.isPressed)
+    }
+}
+
 // MARK: - Bounce animation
 extension Animation {
     static var bouncy: Animation {
