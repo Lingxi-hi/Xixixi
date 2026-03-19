@@ -15,44 +15,25 @@ struct MainGardenView: View {
 
     var body: some View {
         ZStack {
-            // Sky background (全屏)
-            LinearGradient(
-                colors: store.currentSeason.skyGradient,
-                startPoint: .top,
-                endPoint: .center
-            )
+            // ── 花园场景背景（含小猫、蝴蝶、青蛙动画）──
+            GardenSceneView {
+                showPetSheet = true
+            }
             .ignoresSafeArea()
 
-            // Weather particles
+            // 天气粒子叠加
             WeatherOverlayView(weather: store.currentWeather)
-
-            // Grass ground
-            VStack(spacing: 0) {
-                Spacer()
-                RoundedRectangle(cornerRadius: 30, style: .continuous)
-                    .fill(store.currentSeason.grassColor)
-                    .frame(height: 200)
-                    .overlay(grassDecoration, alignment: .topLeading)
-            }
-            .ignoresSafeArea(edges: .bottom)
+                .allowsHitTesting(false)
 
             // 横屏布局：左侧导航栏 + 右侧顶部信息栏 + 中央花园
             HStack(spacing: 0) {
                 // ── 左侧竖向导航栏 ──
                 leftSidebar
 
-                // ── 中央花园 ──
+                // ── 中央花园（物品 + 金币动画）──
                 ZStack {
-                    // 放置物品
                     gardenItemsLayer
 
-                    // 宠物（偏右居中）
-                    PetAnimationView(pet: store.pet, size: 110) {
-                        showPetSheet = true
-                    }
-                    .offset(x: 40, y: -20)
-
-                    // 金币飞出动画
                     if store.showCoinAnimation {
                         CoinFlyView(delta: store.lastCoinDelta)
                             .offset(x: 40, y: -120)
@@ -242,26 +223,6 @@ struct MainGardenView: View {
             }
             .frame(height: 6)
         }
-    }
-
-    // MARK: - 草地装饰
-    private var grassDecoration: some View {
-        let plants: [(String, Color)] = [
-            ("leaf.fill",       Color(red: 0.35, green: 0.75, blue: 0.40)),
-            ("leaf.fill",       Color(red: 0.45, green: 0.80, blue: 0.30)),
-            ("staroflife.fill", Color(red: 0.95, green: 0.55, blue: 0.70)),
-            ("leaf.fill",       Color(red: 0.30, green: 0.70, blue: 0.45)),
-            ("leaf.fill",       Color(red: 0.40, green: 0.78, blue: 0.35)),
-        ]
-        return HStack(spacing: 18) {
-            ForEach(plants.indices, id: \.self) { i in
-                Image(systemName: plants[i].0)
-                    .font(.system(size: 18))
-                    .foregroundStyle(plants[i].1)
-            }
-        }
-        .padding(.top, -10)
-        .padding(.leading, 20)
     }
 
     // MARK: - 花园物品
