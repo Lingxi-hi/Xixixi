@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>猫咪乐园 🐱</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #2d4a1e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    overflow: hidden;
+  }
+  #gameWrapper {
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  #gameCanvas {
+    display: block;
+    cursor: pointer;
+  }
+  #ui {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.45);
+    color: #fff;
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 14px;
+    pointer-events: none;
+    backdrop-filter: blur(4px);
+    white-space: nowrap;
+  }
+  #tip {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.40);
+    color: #ffe;
+    padding: 5px 14px;
+    border-radius: 16px;
+    font-size: 12px;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div id="gameWrapper">
+  <canvas id="gameCanvas"></canvas>
+  <div id="ui">🐱 猫咪花园探险记</div>
+  <div id="tip">点击画面任意处让猫咪奔跑！</div>
+</div>
+
+<script>
+/* =====================================================================
+   CAT GARDEN GAME
+   背景：水彩花园图（garden_bg.jpg）
+   精灵：猫咪跑步精灵表（cat_sprite.jpg，4列×4行=16帧）
+   规则：猫咪自动在花园里奔跑，水池区域不可进入
+   ===================================================================== */
+
+const canvas  = document.getElementById('gameCanvas');
+const ctx     = canvas.getContext('2d');
+const wrapper = document.getElementById('gameWrapper');
+
+// ── 画布尺寸（基于背景图宽高比 ~4:3）──
+const CW = 1200, CH = 900;
+canvas.width  = CW;
+canvas.height = CH;
+
+// ── 响应式缩放 ──
+function resize() {
+  const scaleX = window.innerWidth  / CW;
+  const scaleY = window.innerHeight / CH;
+  const scale  = Math.min(scaleX, scaleY, 1);
+  wrapper.style.width  = (CW * scale) + 'px';
+  wrapper.style.height = (CH * scale) + 'px';
+  canvas.style.width   = (CW * scale) + 'px';
+  canvas.style.height  = (CH * scale) + 'px';
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ── 加载图片 ──
+const bgImg  = new Image();
+const catImg = new Image();
+let bgLoaded = false, catLoaded = false;
+
+bgImg.src  = 'garden_bg.jpg';   // 花园背景图（图一）
+catImg.src = 'cat_sprite.jpg';  // 猫咪精灵表（图二，4×4，16帧）
+
+bgImg.onload   = () => { bgLoaded  = true; };
+catImg.onload  = () => { catLoaded = true; };
+bgImg.onerror  = () => { bgLoaded  = false; };
+catImg.onerror = () => { catLoaded = false; };
+
+/* =====================================================================
+   水池禁区（基于图一中水池的实际位置）
+   水池约在画面左下方：
+     X: 6% ~ 28%  Y: 50% ~ 80%
+   猫咪中心进入该矩形范围时视为碰到水池
+   ===================================================================== */
+const POND = {
+  x: Math.round(CW * 0.055),
+  y: Math.round(CH * 0.495),
+  w: Math.round(CW * 0.225),
+  h: Math.round(CH * 0.305),
+};
+
+/* =====================================================================
+   猫咪行走路径（多个路径点，绕开水池）
+   坐标为画布绝对像素，已手工校验不会进入 POND 区域
+   ===================================================================== */
+const WAYPOINTS = [
+  { x: 580, y: 480 },  // 中央草坪
+  { x: 720, y: 510 },  // 中右草坪
+  { x: 870, y: 560 },  // 右侧路边
+  { x: 960, y: 650 },  // 右下路径
+  { x: 900, y: 740 },  // 路径弯曲处
+  { x: 750, y: 790 },  // 路径下段
+  { x: 600, y: 800 },  // 路径下方中间
+  { x: 450, y: 770 },  // 路径左侧（水池右方）
+  { x: 350, y: 700 },  // 水池右上方（绕开）
+  { x: 340, y: 600 },  // 水池正上方
+  { x: 390, y: 520 },  // 水池右上角外侧
+  { x: 480, y: 470 },  // 中左草坪
+];
+
+/* =====================================================================
+   猫咪状态
+   ===================================================================== */
+const CAT_W = 110;  // 渲染宽度
+const CAT_H = 80;   // 渲染高度
+const SPEED = 160;  // 像素/秒
+
+// 精灵表配置（4列 × 4行）
+const COLS = 4, ROWS = 4;
+// 使用前8帧做跑步循环（第1行+第2行，速度快的奔跑动作）
+const RUN_FRAMES = [0, 1, 2, 3, 4, 5, 6, 7];
+const FRAME_RATE = 10; // 帧/秒（精灵动画）
+
+const cat = {
+  x: WAYPOINTS[0].x,
+  y: WAYPOINTS[0].y,
+  wpIdx: 1,          // 当前目标路径点索引
+  frameIdx: 0,       // 当前精灵帧（在 RUN_FRAMES 内）
+  frameTick: 0,      // 动画计时
+  facingRight: true, // true=面向右，false=面向左（镜像）
+  hearts: [],        // 点击产生的爱心粒子
+};
+
+/* =====================================================================
+   爱心粒子（点击猫咪时）
+   ===================================================================== */
+function spawnHeart(x, y) {
+  cat.hearts.push({
+    x, y,
+    vx: (Math.random() - 0.5) * 60,
+    vy: -80 - Math.random() * 40,
+    alpha: 1,
+    size: 18 + Math.random() * 10,
+    life: 1.2,
+  });
+}
+
+/* =====================================================================
+   碰撞检测：点是否在水池禁区（带 margin）
+   ===================================================================== */
+const MARGIN = 20;
+function inPond(x, y) {
+  return x > POND.x - MARGIN && x < POND.x + POND.w + MARGIN &&
+         y > POND.y - MARGIN && y < POND.y + POND.h + MARGIN;
+}
+
+/* =====================================================================
+   用户点击：点击地面 → 插入临时目标点（需绕开水池）
+              点击猫咪 → 生成爱心
+   ===================================================================== */
+canvas.addEventListener('click', e => {
+  const rect   = canvas.getBoundingClientRect();
+  const scaleX = CW / rect.width;
+  const scaleY = CH / rect.height;
+  const mx = (e.clientX - rect.left)  * scaleX;
+  const my = (e.clientY - rect.top)   * scaleY;
+
+  // 判断是否点到猫咪
+  if (Math.abs(mx - cat.x) < CAT_W / 2 && Math.abs(my - cat.y) < CAT_H / 2) {
+    for (let i = 0; i < 5; i++) spawnHeart(cat.x, cat.y - 30);
+    return;
+  }
+
+  // 点击位置不在水池内才允许导航
+  if (!inPond(mx, my)) {
+    // 在当前索引前插入一个临时点
+    WAYPOINTS.splice(cat.wpIdx, 0, { x: mx, y: my, temp: true });
+    // 清理已有临时点，避免堆积
+    for (let i = WAYPOINTS.length - 1; i >= 0; i--) {
+      if (WAYPOINTS[i].temp && i !== cat.wpIdx) WAYPOINTS.splice(i, 1);
+    }
+  }
+});
+
+/* =====================================================================
+   主循环
+   ===================================================================== */
+let lastTime = 0;
+
+function loop(ts) {
+  const dt = Math.min((ts - lastTime) / 1000, 0.05);
+  lastTime = ts;
+
+  update(dt);
+  draw();
+
+  requestAnimationFrame(loop);
+}
+
+function update(dt) {
+  // ── 移动猫咪到当前路径点 ──
+  const wp = WAYPOINTS[cat.wpIdx];
+  const dx = wp.x - cat.x;
+  const dy = wp.y - cat.y;
+  const dist = Math.hypot(dx, dy);
+
+  if (dist < 6) {
+    // 到达路径点
+    if (wp.temp) WAYPOINTS.splice(cat.wpIdx, 1);
+    else cat.wpIdx++;
+    if (cat.wpIdx >= WAYPOINTS.length) cat.wpIdx = 0;
+  } else {
+    const step = SPEED * dt;
+    const nx = cat.x + (dx / dist) * step;
+    const ny = cat.y + (dy / dist) * step;
+    // 如果下一步会进水池，跳过这个路径点
+    if (inPond(nx, ny)) {
+      if (wp.temp) WAYPOINTS.splice(cat.wpIdx, 1);
+      else cat.wpIdx = (cat.wpIdx + 1) % WAYPOINTS.length;
+    } else {
+      cat.x = nx;
+      cat.y = ny;
+      cat.facingRight = dx > 0;
+    }
+  }
+
+  // ── 精灵动画 ──
+  cat.frameTick += dt * FRAME_RATE;
+  if (cat.frameTick >= 1) {
+    cat.frameTick -= 1;
+    cat.frameIdx = (cat.frameIdx + 1) % RUN_FRAMES.length;
+  }
+
+  // ── 爱心粒子 ──
+  for (let h of cat.hearts) {
+    h.x    += h.vx * dt;
+    h.y    += h.vy * dt;
+    h.vy   += 30 * dt; // 微弱重力
+    h.life -= dt;
+    h.alpha = Math.max(0, h.life / 1.2);
+  }
+  cat.hearts = cat.hearts.filter(h => h.life > 0);
+}
+
+/* =====================================================================
+   绘制
+   ===================================================================== */
+function draw() {
+  ctx.clearRect(0, 0, CW, CH);
+
+  // ── 背景 ──
+  if (bgLoaded) {
+    ctx.drawImage(bgImg, 0, 0, CW, CH);
+  } else {
+    drawFallbackBg();
+  }
+
+  // ── 猫咪脚影 ──
+  ctx.save();
+  ctx.globalAlpha = 0.18;
+  ctx.fillStyle   = '#000';
+  ctx.beginPath();
+  ctx.ellipse(cat.x, cat.y + CAT_H * 0.42, CAT_W * 0.38, CAT_H * 0.12, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // ── 猫咪精灵 ──
+  const frame  = RUN_FRAMES[cat.frameIdx];
+  const col    = frame % COLS;
+  const row    = Math.floor(frame / COLS);
+
+  if (catLoaded) {
+    const sw = catImg.naturalWidth  / COLS;
+    const sh = catImg.naturalHeight / ROWS;
+    ctx.save();
+    if (!cat.facingRight) {
+      ctx.scale(-1, 1);
+      ctx.drawImage(catImg,
+        col * sw, row * sh, sw, sh,
+        -(cat.x + CAT_W / 2), cat.y - CAT_H / 2, CAT_W, CAT_H
+      );
+    } else {
+      ctx.drawImage(catImg,
+        col * sw, row * sh, sw, sh,
+        cat.x - CAT_W / 2, cat.y - CAT_H / 2, CAT_W, CAT_H
+      );
+    }
+    ctx.restore();
+  } else {
+    drawFallbackCat(cat.x, cat.y, cat.facingRight, frame);
+  }
+
+  // ── 爱心 ──
+  for (const h of cat.hearts) {
+    ctx.save();
+    ctx.globalAlpha = h.alpha;
+    ctx.font        = `${h.size}px serif`;
+    ctx.textAlign   = 'center';
+    ctx.fillText('❤️', h.x, h.y);
+    ctx.restore();
+  }
+
+  // ── 调试：绘制水池禁区轮廓（开发时可取消注释）──
+  // drawPondDebug();
+}
+
+/* =====================================================================
+   后备背景绘制（当 garden_bg.jpg 未加载时）
+   ===================================================================== */
+function drawFallbackBg() {
+  // 天空
+  const sky = ctx.createLinearGradient(0, 0, 0, CH * 0.45);
+  sky.addColorStop(0, '#c8e8f5');
+  sky.addColorStop(1, '#e8f5e9');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, CW, CH * 0.45);
+
+  // 草地
+  const grass = ctx.createLinearGradient(0, CH * 0.35, 0, CH);
+  grass.addColorStop(0, '#7cb85c');
+  grass.addColorStop(1, '#5a9a3a');
+  ctx.fillStyle = grass;
+  ctx.fillRect(0, CH * 0.35, CW, CH * 0.65);
+
+  // 石围墙（背景）
+  ctx.fillStyle = '#b0a090';
+  ctx.fillRect(60, CH * 0.25, CW * 0.62, 28);
+  for (let x = 60; x < CW * 0.62; x += 45) {
+    ctx.fillStyle = '#c8b8a0';
+    ctx.fillRect(x + 2, CH * 0.25 + 2, 40, 24);
+  }
+
+  // 大树（左右）
+  drawTree(ctx, 80,  CH * 0.40, 1.3);
+  drawTree(ctx, 250, CH * 0.30, 1.0);
+  drawTree(ctx, CW - 160, CH * 0.30, 1.2);
+  drawTree(ctx, CW - 60,  CH * 0.42, 0.9);
+  drawTree(ctx, 170, CH * 0.60, 0.6);
+
+  // 木屋（右上）
+  drawHouse(ctx, CW * 0.72, CH * 0.35);
+
+  // 花园长椅（左中）
+  drawBench(ctx, CW * 0.25, CH * 0.52);
+
+  // 水池（左下 - 与 POND 常量对应）
+  drawPond(ctx);
+
+  // 小路（蜿蜒泥土路）
+  drawPath(ctx);
+
+  // 花朵、蘑菇
+  drawFlowers(ctx);
+
+  // 木牌"乐园"
+  drawSign(ctx, CW * 0.82, CH * 0.58);
+}
+
+function drawTree(ctx, x, y, scale = 1) {
+  // 树干
+  ctx.fillStyle = '#6b4423';
+  ctx.fillRect(x - 12 * scale, y, 24 * scale, 60 * scale);
+  // 树冠（多个圆）
+  const greens = ['#4a8a2a', '#5ca035', '#3d7520'];
+  for (let i = 0; i < 3; i++) {
+    ctx.fillStyle = greens[i % greens.length];
+    ctx.beginPath();
+    ctx.arc(x + (i - 1) * 22 * scale, y - 20 * scale - i * 8 * scale, 44 * scale, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = '#3d7520';
+  ctx.beginPath();
+  ctx.arc(x, y - 55 * scale, 36 * scale, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawHouse(ctx, x, y) {
+  // 房体
+  ctx.fillStyle = '#c8a870';
+  ctx.fillRect(x, y, 160, 120);
+  // 门
+  ctx.fillStyle = '#7b5230';
+  ctx.beginPath();
+  ctx.arc(x + 62, y + 120, 24, Math.PI, 0);
+  ctx.fillRect(x + 38, y + 80, 48, 40);
+  ctx.fill();
+  // 窗
+  ctx.fillStyle = '#a8c8e8';
+  ctx.fillRect(x + 100, y + 40, 38, 30);
+  ctx.strokeStyle = '#6b4423'; ctx.lineWidth = 2;
+  ctx.strokeRect(x + 100, y + 40, 38, 30);
+  ctx.beginPath(); ctx.moveTo(x+119, y+40); ctx.lineTo(x+119, y+70); ctx.stroke();
+  // 茅草屋顶
+  ctx.fillStyle = '#c8a440';
+  const roofPts = [[x - 12, y], [x + 80, y - 55], [x + 172, y]];
+  ctx.beginPath();
+  ctx.moveTo(roofPts[0][0], roofPts[0][1]);
+  ctx.lineTo(roofPts[1][0], roofPts[1][1]);
+  ctx.lineTo(roofPts[2][0], roofPts[2][1]);
+  ctx.closePath(); ctx.fill();
+  // 烟囱
+  ctx.fillStyle = '#8b6048';
+  ctx.fillRect(x + 120, y - 70, 22, 40);
+}
+
+function drawBench(ctx, x, y) {
+  ctx.fillStyle = '#8b6030';
+  ctx.fillRect(x, y, 90, 8); // 座面
+  ctx.fillRect(x + 5, y + 8, 8, 30); // 腿
+  ctx.fillRect(x + 77, y + 8, 8, 30);
+  ctx.fillRect(x, y - 30, 90, 6); // 靠背
+  ctx.fillRect(x + 5, y - 30, 8, 38);
+  ctx.fillRect(x + 77, y - 30, 8, 38);
+}
+
+function drawPond(ctx) {
+  const { x, y, w, h } = POND;
+  // 水池石边
+  ctx.strokeStyle = '#888070'; ctx.lineWidth = 14;
+  ctx.beginPath();
+  ctx.ellipse(x + w/2, y + h/2, w/2 + 8, h/2 + 6, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  // 水面
+  const waterGrad = ctx.createRadialGradient(x+w/2, y+h/2, 10, x+w/2, y+h/2, w/2);
+  waterGrad.addColorStop(0, '#aad4ec');
+  waterGrad.addColorStop(1, '#7ab8d8');
+  ctx.fillStyle = waterGrad;
+  ctx.beginPath();
+  ctx.ellipse(x + w/2, y + h/2, w/2, h/2, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // 睡莲
+  ctx.fillStyle = '#4a9a3a';
+  ctx.beginPath(); ctx.ellipse(x + w*0.4, y + h*0.55, 18, 11, 0.3, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#f5f5f5';
+  ctx.beginPath(); ctx.arc(x + w*0.4, y + h*0.44, 7, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#f5c842';
+  ctx.beginPath(); ctx.arc(x + w*0.4, y + h*0.44, 3.5, 0, Math.PI*2); ctx.fill();
+  // 水草
+  ctx.strokeStyle = '#3a8040'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(x + w*0.22, y + h*0.8); ctx.lineTo(x + w*0.20, y + h*0.50); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + w*0.70, y + h*0.85); ctx.lineTo(x + w*0.72, y + h*0.52); ctx.stroke();
+}
+
+function drawPath(ctx) {
+  ctx.strokeStyle = '#c4a870'; ctx.lineWidth = 48; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(CW * 0.52, CH * 0.50);
+  ctx.bezierCurveTo(CW * 0.65, CH * 0.58, CW * 0.72, CH * 0.68, CW * 0.80, CH * 0.82);
+  ctx.stroke();
+  // 路上石子
+  ctx.fillStyle = '#a89060';
+  const stones = [[620,530],[680,575],[730,620],[770,670],[790,720],[760,770]];
+  for (const [sx, sy] of stones) {
+    ctx.beginPath(); ctx.ellipse(sx, sy, 7, 4, 0.3, 0, Math.PI*2); ctx.fill();
+  }
+}
+
+function drawFlowers(ctx) {
+  const flowers = [
+    { x: 340, y: 750, color: '#e83030', r: 8 },  // 红玫瑰
+    { x: 310, y: 790, color: '#e82060', r: 7 },
+    { x: 200, y: 730, color: '#f5f5f5', r: 7 },  // 白菊
+    { x: 230, y: 770, color: '#f5f5f5', r: 7 },
+    { x: 550, y: 790, color: '#f5c830', r: 7 },  // 黄花
+    { x: 590, y: 810, color: '#f5c830', r: 7 },
+    { x: 820, y: 760, color: '#f5f5f5', r: 6 },
+    { x: 1050, y: 680, color: '#60a0e0', r: 6 }, // 蓝花
+    { x: 1080, y: 710, color: '#6080e8', r: 5 },
+    { x: 480, y: 460, color: '#f5c830', r: 5 },
+    { x: 560, y: 440, color: '#f5f5f5', r: 5 },
+  ];
+  for (const f of flowers) {
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      ctx.fillStyle = f.color;
+      ctx.beginPath();
+      ctx.ellipse(f.x + Math.cos(angle) * f.r * 1.2, f.y + Math.sin(angle) * f.r * 1.2,
+                  f.r * 0.65, f.r * 0.50, angle, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = '#f5e040';
+    ctx.beginPath(); ctx.arc(f.x, f.y, f.r * 0.45, 0, Math.PI * 2); ctx.fill();
+  }
+  // 蘑菇
+  const shrooms = [[130, 650], [260, 790], [550, 620], [870, 610], [940, 770]];
+  for (const [sx, sy] of shrooms) {
+    ctx.fillStyle = '#cc2020';
+    ctx.beginPath(); ctx.ellipse(sx, sy - 10, 11, 8, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(sx - 4, sy - 12, 2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(sx + 4, sy - 9,  2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#f5e8c0';
+    ctx.fillRect(sx - 4, sy - 4, 8, 14);
+  }
+}
+
+function drawSign(ctx, x, y) {
+  ctx.fillStyle = '#8b6030';
+  ctx.fillRect(x - 3, y, 6, 60);    // 木柱
+  ctx.fillRect(x - 3, y - 5, 6, 60);
+  ctx.fillStyle = '#c89050';
+  ctx.fillRect(x - 35, y - 10, 80, 44); // 木牌
+  ctx.fillStyle = '#6b3810';
+  ctx.font = 'bold 24px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('乐园', x + 5, y + 22);
+}
+
+/* =====================================================================
+   后备猫咪绘制（当 cat_sprite.jpg 未加载时）
+   简单绘制三花猫，frame 0-7 模拟跑步动作
+   ===================================================================== */
+function drawFallbackCat(x, y, facingRight, frame) {
+  ctx.save();
+  if (!facingRight) {
+    ctx.translate(x, y);
+    ctx.scale(-1, 1);
+    ctx.translate(-x, -y);
+  }
+
+  const t = frame / 8 * Math.PI * 2;
+  const bodyBob  = Math.sin(t * 2) * 3;   // 身体上下抖动
+  const legSwing = Math.sin(t) * 18;       // 腿摆动角度
+
+  const bx = x, by = y + bodyBob;
+
+  // 身体
+  ctx.fillStyle = '#f0e4cc';
+  ctx.beginPath(); ctx.ellipse(bx, by, 36, 22, 0, 0, Math.PI * 2); ctx.fill();
+  // 橙斑
+  ctx.fillStyle = 'rgba(205,120,40,0.5)';
+  ctx.beginPath(); ctx.ellipse(bx + 8, by - 4, 14, 10, -0.3, 0, Math.PI * 2); ctx.fill();
+  // 黑斑
+  ctx.fillStyle = 'rgba(50,40,30,0.45)';
+  ctx.beginPath(); ctx.ellipse(bx - 12, by + 4, 10, 8, 0.2, 0, Math.PI * 2); ctx.fill();
+
+  // 头
+  ctx.fillStyle = '#f0e4cc';
+  ctx.beginPath(); ctx.arc(bx + 32, by - 12, 20, 0, Math.PI * 2); ctx.fill();
+  // 头部橙斑
+  ctx.fillStyle = 'rgba(200,110,35,0.5)';
+  ctx.beginPath(); ctx.arc(bx + 37, by - 16, 10, 0, Math.PI * 2); ctx.fill();
+
+  // 耳朵
+  ctx.fillStyle = '#e8d8b8';
+  ctx.beginPath();
+  ctx.moveTo(bx + 20, by - 28); ctx.lineTo(bx + 14, by - 44); ctx.lineTo(bx + 28, by - 34); ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(bx + 40, by - 28); ctx.lineTo(bx + 46, by - 44); ctx.lineTo(bx + 34, by - 34); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#f5b0b8';
+  ctx.beginPath();
+  ctx.moveTo(bx + 21, by - 31); ctx.lineTo(bx + 16, by - 41); ctx.lineTo(bx + 27, by - 33); ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(bx + 39, by - 31); ctx.lineTo(bx + 44, by - 41); ctx.lineTo(bx + 33, by - 33); ctx.closePath(); ctx.fill();
+
+  // 眼睛
+  ctx.fillStyle = '#2a8035';
+  ctx.beginPath(); ctx.ellipse(bx + 26, by - 12, 5, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(bx + 38, by - 12, 5, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#111';
+  ctx.beginPath(); ctx.ellipse(bx + 26, by - 12, 2.5, 4, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(bx + 38, by - 12, 2.5, 4, 0, 0, Math.PI * 2); ctx.fill();
+
+  // 鼻子
+  ctx.fillStyle = '#f0809a';
+  ctx.beginPath();
+  ctx.moveTo(bx + 32, by - 6); ctx.lineTo(bx + 29, by - 3); ctx.lineTo(bx + 35, by - 3); ctx.closePath(); ctx.fill();
+
+  // 胡须
+  ctx.strokeStyle = 'rgba(160,140,120,0.7)'; ctx.lineWidth = 1;
+  for (let i = -1; i <= 1; i++) {
+    ctx.beginPath(); ctx.moveTo(bx + 30, by - 4 + i * 3); ctx.lineTo(bx + 15, by - 4 + i * 4 - i * 1); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx + 34, by - 4 + i * 3); ctx.lineTo(bx + 50, by - 4 + i * 4 - i * 1); ctx.stroke();
+  }
+
+  // 腿（前后各两条，跑步时交替摆动）
+  ctx.strokeStyle = '#e0d0b0'; ctx.lineWidth = 7; ctx.lineCap = 'round';
+  // 前腿
+  ctx.beginPath();
+  ctx.moveTo(bx + 22, by + 16);
+  ctx.lineTo(bx + 22 + Math.cos(legSwing * 0.06) * 14, by + 34 + Math.abs(Math.sin(t)) * 6);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(bx + 12, by + 16);
+  ctx.lineTo(bx + 12 - Math.cos(legSwing * 0.06) * 14, by + 34 + Math.abs(Math.cos(t)) * 6);
+  ctx.stroke();
+  // 后腿
+  ctx.beginPath();
+  ctx.moveTo(bx - 18, by + 14);
+  ctx.lineTo(bx - 18 + Math.cos((legSwing + 90) * 0.06) * 12, by + 32 + Math.abs(Math.sin(t + 1)) * 6);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(bx - 28, by + 14);
+  ctx.lineTo(bx - 28 - Math.cos((legSwing + 90) * 0.06) * 12, by + 32 + Math.abs(Math.cos(t + 1)) * 6);
+  ctx.stroke();
+
+  // 尾巴
+  const tailAngle = Math.sin(t * 1.5) * 0.5;
+  ctx.strokeStyle = '#e0d0b0'; ctx.lineWidth = 7; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(bx - 34, by + 4);
+  ctx.bezierCurveTo(
+    bx - 50 + Math.cos(tailAngle) * 10, by - 8 + Math.sin(tailAngle) * 20,
+    bx - 56 + Math.cos(tailAngle) * 18, by - 24 + Math.sin(tailAngle) * 28,
+    bx - 52 + Math.cos(tailAngle) * 22, by - 36 + Math.sin(tailAngle) * 32
+  );
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+/* =====================================================================
+   调试：绘制水池禁区
+   ===================================================================== */
+function drawPondDebug() {
+  ctx.strokeStyle = 'rgba(255,0,0,0.5)'; ctx.lineWidth = 2;
+  ctx.strokeRect(POND.x, POND.y, POND.w, POND.h);
+  ctx.fillStyle = 'rgba(255,0,0,0.08)';
+  ctx.fillRect(POND.x, POND.y, POND.w, POND.h);
+}
+
+// ── 启动 ──
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
